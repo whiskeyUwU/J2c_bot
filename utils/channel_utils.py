@@ -102,37 +102,13 @@ async def refresh_panel(
         pass
 
 
-async def _host_html_online(html_content: str, filename: str) -> str | None:
-    """Upload the HTML file to 0x0.st and return a direct browser URL."""
-    try:
-        import aiohttp
-        form = aiohttp.FormData()
-        form.add_field(
-            "file",
-            html_content.encode("utf-8"),
-            filename=filename,
-            content_type="text/html; charset=utf-8",
-        )
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                "https://0x0.st",
-                data=form,
-                timeout=aiohttp.ClientTimeout(total=30),
-            ) as resp:
-                if resp.status == 200:
-                    return (await resp.text()).strip()
-    except Exception:
-        pass
-    return None
-
-
 async def _upload_html_transcript(
     guild: discord.Guild,
     ch_data: TempChannel,
     vc: discord.VoiceChannel,
     bot=None,
 ) -> None:
-    """Generate an HTML transcript, host it online, and post a direct link to the log channel."""
+    """Generate an HTML transcript using chat-exporter and upload to the log channel."""
     config = db.get_config(guild.id)
     if not config or not config.log_channel_id:
         return
@@ -163,41 +139,28 @@ async def _upload_html_transcript(
         or "vc"
     )
     date_str = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M")
-    filename  = f"transcript-{safe_name}-{date_str}.html"
-
-    # Try to host online for a direct browser link
-    transcript_url = await _host_html_online(transcript, filename)
+    filename = f"transcript-{safe_name}-{date_str}.html"
+    file = discord.File(
+        io.BytesIO(transcript.encode("utf-8")),
+        filename=filename,
+    )
 
     embed = discord.Embed(
         title="📋 Voice Chat Transcript",
+        description=(
+            f"Transcript saved — download the `.html` file and open it in your browser."
+        ),
         color=0x5865F2,
     )
     embed.add_field(name="Channel", value=ch_data.name, inline=True)
-    embed.add_field(name="Owner",   value=f"<@{ch_data.owner_id}>", inline=True)
+    embed.add_field(name="Owner", value=f"<@{ch_data.owner_id}>", inline=True)
+    embed.set_footer(text="Open the .html file in any browser to view")
     embed.timestamp = discord.utils.utcnow()
 
-    if transcript_url:
-        # Post as a clickable link — opens directly in browser
-        embed.description = (
-            f"### [🔗 Click here to view the transcript]({transcript_url})\n"
-            f"Opens directly in your browser — no download needed."
-        )
-        embed.set_footer(text="Hosted on 0x0.st • Link valid for ~30 days")
-        try:
-            await log_ch.send(embed=embed)
-        except (discord.Forbidden, discord.HTTPException):
-            pass
-    else:
-        # Fallback: attach the file if hosting fails
-        embed.description = (
-            f"Transcript saved — download the `.html` file and open it in your browser."
-        )
-        embed.set_footer(text="Open the .html file in any browser to view")
-        file = discord.File(io.BytesIO(transcript.encode("utf-8")), filename=filename)
-        try:
-            await log_ch.send(embed=embed, file=file)
-        except (discord.Forbidden, discord.HTTPException):
-            pass
+    try:
+        await log_ch.send(embed=embed, file=file)
+    except (discord.Forbidden, discord.HTTPException):
+        pass
 
 
 async def cleanup(
