@@ -261,7 +261,7 @@ class VoiceCog(commands.Cog):
         from cogs.panel_cog import TempVCControlView
         embed = build_embed(channel, ch_data)
         view  = TempVCControlView()
-        view.customize_for_guild(guild)
+        view.customize_for_client(self.bot)
         try:
             file = discord.File("interface.png", filename="interface.png")
             msg = await channel.send(

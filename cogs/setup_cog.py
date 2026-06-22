@@ -96,7 +96,7 @@ class SetupCog(commands.Cog):
         from cogs.panel_cog import TempVCSharedView, build_shared_embed
         shared_embed = build_shared_embed(guild)
         shared_view  = TempVCSharedView()
-        shared_view.customize_for_guild(guild)
+        shared_view.customize_for_client(self.bot)
         file = discord.File("interface.png", filename="interface.png")
         shared_msg = await panel_channel.send(file=file, embed=shared_embed, view=shared_view)
 

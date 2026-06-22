@@ -3,30 +3,30 @@ from __future__ import annotations
 import discord
 from utils.database import TempChannel
 
-def get_emoji(guild: discord.Guild | None, name: str, fallback: str) -> str:
-    if not guild:
+def get_emoji(client: discord.Client | None, name: str, fallback: str) -> str:
+    if not client:
         return fallback
     prefixes = ["tempvc_ico_", "tempvc_icon_", "tempvc_btn_", "tempvc_", "vvc_ico_", "vvc_icon_", "vvc_btn_", "vvc_", ""]
     for prefix in prefixes:
         clean_name = name.replace("tempvc_ico_", "").replace("tempvc_icon_", "").replace("tempvc_btn_", "").replace("tempvc_", "").replace("vvc_ico_", "").replace("vvc_icon_", "").replace("vvc_btn_", "").replace("vvc_", "")
-        emoji = discord.utils.get(guild.emojis, name=f"{prefix}{clean_name}")
+        emoji = discord.utils.get(client.emojis, name=f"{prefix}{clean_name}")
         if emoji:
             return str(emoji)
-    emoji = discord.utils.get(guild.emojis, name=name)
+    emoji = discord.utils.get(client.emojis, name=name)
     if emoji:
         return str(emoji)
     return fallback
 
-def get_button_emoji(guild: discord.Guild | None, name: str, fallback: str):
-    if not guild:
+def get_button_emoji(client: discord.Client | None, name: str, fallback: str):
+    if not client:
         return fallback
     prefixes = ["tempvc_ico_", "tempvc_icon_", "tempvc_btn_", "tempvc_", "vvc_ico_", "vvc_icon_", "vvc_btn_", "vvc_", ""]
     for prefix in prefixes:
         clean_name = name.replace("tempvc_ico_", "").replace("tempvc_icon_", "").replace("tempvc_btn_", "").replace("tempvc_", "").replace("vvc_ico_", "").replace("vvc_icon_", "").replace("vvc_btn_", "").replace("vvc_", "")
-        emoji = discord.utils.get(guild.emojis, name=f"{prefix}{clean_name}")
+        emoji = discord.utils.get(client.emojis, name=f"{prefix}{clean_name}")
         if emoji:
             return emoji
-    emoji = discord.utils.get(guild.emojis, name=name)
+    emoji = discord.utils.get(client.emojis, name=name)
     if emoji:
         return emoji
     return fallback

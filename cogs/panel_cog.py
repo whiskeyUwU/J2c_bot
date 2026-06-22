@@ -86,7 +86,7 @@ class NameModal(discord.ui.Modal, title="Rename Voice Channel"):
             f"Voice channel owner {interaction.user.mention} renamed their channel to **{name}**.",
             color=0x3498DB
         )
-        e = get_emoji(interaction.guild, "tempvc_ico_name", "🏷️")
+        e = get_emoji(interaction.client, "tempvc_ico_name", "🏷️")
         await interaction.response.send_message(f"{e} Channel renamed to **{name}**!", ephemeral=True)
 
 class LimitModal(discord.ui.Modal, title="Set User Limit"):
@@ -127,7 +127,7 @@ class LimitModal(discord.ui.Modal, title="Set User Limit"):
             f"Voice channel owner {interaction.user.mention} set user limit to **{label}** in {channel.mention}.",
             color=0x3498DB
         )
-        e = get_emoji(interaction.guild, "tempvc_ico_limit", "👥")
+        e = get_emoji(interaction.client, "tempvc_ico_limit", "👥")
         await interaction.response.send_message(f"{e} User limit set to {label}!", ephemeral=True)
 
 _REGION_OPTIONS = [
@@ -183,7 +183,7 @@ class RegionSelectView(discord.ui.View):
             f"Voice channel owner {interaction.user.mention} set voice region to **{label}** in {channel.mention}.",
             color=0x3498DB
         )
-        e_region = get_emoji(interaction.guild, "tempvc_ico_region", "🌐")
+        e_region = get_emoji(interaction.client, "tempvc_ico_region", "🌐")
         await interaction.response.edit_message(
             content=f"{e_region} Region changed to **{label}**!", view=None
         )
@@ -240,7 +240,7 @@ class PrivacySelectView(discord.ui.View):
             )
             ch_data.is_locked = False
             ch_data.is_hidden  = False
-            e_pub = get_emoji(interaction.guild, "tempvc_ico_privacy", "🔓")
+            e_pub = get_emoji(interaction.client, "tempvc_ico_privacy", "🔓")
             status = f"{e_pub} Channel is now **Public** — anyone can see and join."
 
         elif value == "locked":
@@ -250,7 +250,7 @@ class PrivacySelectView(discord.ui.View):
             )
             ch_data.is_locked = True
             ch_data.is_hidden  = False
-            e_lock = get_emoji(interaction.guild, "tempvc_ico_privacy", "🔒")
+            e_lock = get_emoji(interaction.client, "tempvc_ico_privacy", "🔒")
             status = f"{e_lock} Channel is now **Locked** — visible but only trusted/invited users can join."
 
         elif value == "hidden":
@@ -260,7 +260,7 @@ class PrivacySelectView(discord.ui.View):
             )
             ch_data.is_locked = True
             ch_data.is_hidden  = True
-            e_hide = get_emoji(interaction.guild, "tempvc_ico_privacy", "🙈")
+            e_hide = get_emoji(interaction.client, "tempvc_ico_privacy", "🙈")
             status = f"{e_hide} Channel is now **Hidden** — invisible to everyone except trusted/invited users."
 
         else:
@@ -327,7 +327,7 @@ class UserActionView(discord.ui.View):
                 target, view_channel=True, connect=True, speak=True,
                 reason="TempVC: Trusted by owner"
             )
-            e = get_emoji(interaction.guild, "tempvc_ico_trust", "✅")
+            e = get_emoji(interaction.client, "tempvc_ico_trust", "✅")
             msg = f"{e} **{target.display_name}** is now trusted and can bypass the channel lock."
 
         elif action == "untrust":
@@ -341,7 +341,7 @@ class UserActionView(discord.ui.View):
                 await channel.set_permissions(target, connect=False, speak=False, view_channel=False)
             else:
                 await channel.set_permissions(target, overwrite=None)
-            e = get_emoji(interaction.guild, "tempvc_ico_untrust", "❎")
+            e = get_emoji(interaction.client, "tempvc_ico_untrust", "❎")
             msg = f"{e} **{target.display_name}** has been untrusted."
 
         elif action == "invite":
@@ -358,7 +358,7 @@ class UserActionView(discord.ui.View):
                 )
             except discord.Forbidden:
                 pass
-            e = get_emoji(interaction.guild, "tempvc_ico_invite", "📨")
+            e = get_emoji(interaction.client, "tempvc_ico_invite", "📨")
             msg = f"{e} **{target.display_name}** has been invited and can now join!"
 
         elif action == "kick":
@@ -372,7 +372,7 @@ class UserActionView(discord.ui.View):
                 return await interaction.response.edit_message(
                     content="❌ Couldn't kick — check the bot's permissions!", view=None
                 )
-            e = get_emoji(interaction.guild, "tempvc_ico_kick", "👢")
+            e = get_emoji(interaction.client, "tempvc_ico_kick", "👢")
             msg = f"{e} **{target.display_name}** has been kicked from the channel."
 
         elif action == "block":
@@ -393,7 +393,7 @@ class UserActionView(discord.ui.View):
                     await target.move_to(None, reason="TempVC: Blocked — removing from VC")
                 except discord.HTTPException:
                     pass
-            e = get_emoji(interaction.guild, "tempvc_ico_block", "🚫")
+            e = get_emoji(interaction.client, "tempvc_ico_block", "🚫")
             msg = f"{e} **{target.display_name}** has been blocked from your channel."
 
         elif action == "unblock":
@@ -406,7 +406,7 @@ class UserActionView(discord.ui.View):
                 await channel.set_permissions(target, view_channel=True, connect=True, speak=True)
             else:
                 await channel.set_permissions(target, overwrite=None)
-            e = get_emoji(interaction.guild, "tempvc_ico_unblock", "✔️")
+            e = get_emoji(interaction.client, "tempvc_ico_unblock", "✔️")
             msg = f"{e} **{target.display_name}** has been unblocked."
 
         elif action == "transfer":
@@ -419,7 +419,7 @@ class UserActionView(discord.ui.View):
             ch_data.owner_id = target.id
             await revoke_owner_perms(channel, old_owner)
             await grant_owner_perms(channel, target)
-            e = get_emoji(interaction.guild, "tempvc_ico_transfer", "🔄")
+            e = get_emoji(interaction.client, "tempvc_ico_transfer", "🔄")
             msg = f"{e} Ownership successfully transferred to **{target.display_name}**!"
 
         else:
@@ -437,7 +437,7 @@ class UserActionView(discord.ui.View):
             "transfer": ("tempvc_ico_transfer", "🔄"),
         }
         _iname, _ifallback = icon_map.get(action, ("tempvc_ico_name", "⚙️"))
-        emoji = get_emoji(interaction.guild, _iname, _ifallback)
+        emoji = get_emoji(interaction.client, _iname, _ifallback)
         await log_to_admin_channel(
             interaction.guild,
             f"{emoji} Member Action: {action.capitalize()}",
@@ -468,7 +468,7 @@ class TempVCControlView(discord.ui.View):
     def __init__(self) -> None:
         super().__init__(timeout=None)
 
-    def customize_for_guild(self, guild: discord.Guild | None) -> None:
+    def customize_for_client(self, client: discord.Client) -> None:
         fallbacks = {
             "name": ("tempvc_ico_name", "🏷️"),
             "limit": ("tempvc_ico_limit", "👥"),
@@ -493,7 +493,7 @@ class TempVCControlView(discord.ui.View):
                     action = parts[1]
                     if action in fallbacks:
                         emoji_name, fallback_emoji = fallbacks[action]
-                        item.emoji = get_button_emoji(guild, emoji_name, fallback_emoji)
+                        item.emoji = get_button_emoji(client, emoji_name, fallback_emoji)
                         item.label = None
 
 
@@ -643,7 +643,7 @@ class TempVCControlView(discord.ui.View):
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
         await interaction.response.send_message(
-            f"{get_emoji(interaction.guild, 'tempvc_ico_trust', '✅')} **Trust a User** — Trusted users can join even when the channel is locked.",
+            f"{get_emoji(interaction.client, 'tempvc_ico_trust', '✅')} **Trust a User** — Trusted users can join even when the channel is locked.",
             view=UserActionView("trust", cid), ephemeral=True,
         )
 
@@ -653,7 +653,7 @@ class TempVCControlView(discord.ui.View):
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
         await interaction.response.send_message(
-            f"{get_emoji(interaction.guild, 'tempvc_ico_untrust', '❎')} **Untrust a User** — Remove a user's trusted status.",
+            f"{get_emoji(interaction.client, 'tempvc_ico_untrust', '❎')} **Untrust a User** — Remove a user's trusted status.",
             view=UserActionView("untrust", cid), ephemeral=True,
         )
 
@@ -663,7 +663,7 @@ class TempVCControlView(discord.ui.View):
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
         await interaction.response.send_message(
-            f"{get_emoji(interaction.guild, 'tempvc_ico_invite', '📨')} **Invite a User** — They'll receive a DM and can join even if the channel is locked.",
+            f"{get_emoji(interaction.client, 'tempvc_ico_invite', '📨')} **Invite a User** — They'll receive a DM and can join even if the channel is locked.",
             view=UserActionView("invite", cid), ephemeral=True,
         )
 
@@ -681,7 +681,7 @@ class TempVCControlView(discord.ui.View):
                 ephemeral=True,
             )
         await interaction.response.send_message(
-            f"{get_emoji(interaction.guild, 'tempvc_ico_kick', '👢')} **Kick a User** — Disconnect them from your channel.\n*(You can also right-click any member and choose Disconnect.)*",
+            f"{get_emoji(interaction.client, 'tempvc_ico_kick', '👢')} **Kick a User** — Disconnect them from your channel.\n*(You can also right-click any member and choose Disconnect.)*",
             view=UserActionView("kick", cid), ephemeral=True,
         )
 
@@ -691,7 +691,7 @@ class TempVCControlView(discord.ui.View):
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
         await interaction.response.send_message(
-            f"{get_emoji(interaction.guild, 'tempvc_ico_region', '🌐')} **Change Voice Region** — Pick a specific server region.",
+            f"{get_emoji(interaction.client, 'tempvc_ico_region', '🌐')} **Change Voice Region** — Pick a specific server region.",
             view=RegionSelectView(cid), ephemeral=True,
         )
 
@@ -701,7 +701,7 @@ class TempVCControlView(discord.ui.View):
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
         await interaction.response.send_message(
-            f"{get_emoji(interaction.guild, 'tempvc_ico_block', '🚫')} **Block a User** — They won't be able to join your channel.",
+            f"{get_emoji(interaction.client, 'tempvc_ico_block', '🚫')} **Block a User** — They won't be able to join your channel.",
             view=UserActionView("block", cid), ephemeral=True,
         )
 
@@ -711,7 +711,7 @@ class TempVCControlView(discord.ui.View):
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
         await interaction.response.send_message(
-            f"{get_emoji(interaction.guild, 'tempvc_ico_unblock', '✔️')} **Unblock a User** — Allow a previously blocked user to join.",
+            f"{get_emoji(interaction.client, 'tempvc_ico_unblock', '✔️')} **Unblock a User** — Allow a previously blocked user to join.",
             view=UserActionView("unblock", cid), ephemeral=True,
         )
 
@@ -758,7 +758,7 @@ class TempVCControlView(discord.ui.View):
             color=0x3498DB
         )
         await interaction.response.send_message(
-            f"{get_emoji(interaction.guild, 'tempvc_ico_claim', '👑')} You've successfully claimed **{channel.name}**!", ephemeral=True
+            f"{get_emoji(interaction.client, 'tempvc_ico_claim', '👑')} You've successfully claimed **{channel.name}**!", ephemeral=True
         )
 
     @discord.ui.button(label="TRANSFER", emoji="🔄", style=discord.ButtonStyle.secondary,  custom_id="tempvc:transfer", row=2)
@@ -767,7 +767,7 @@ class TempVCControlView(discord.ui.View):
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
         await interaction.response.send_message(
-            f"{get_emoji(interaction.guild, 'tempvc_ico_transfer', '🔄')} **Transfer Ownership** — Hand control of your channel to someone in the VC.",
+            f"{get_emoji(interaction.client, 'tempvc_ico_transfer', '🔄')} **Transfer Ownership** — Hand control of your channel to someone in the VC.",
             view=UserActionView("transfer", cid), ephemeral=True,
         )
 
@@ -783,7 +783,7 @@ class TempVCControlView(discord.ui.View):
         extra_note = f"\nThis will also delete the {' and '.join(extras)}." if extras else ""
 
         await interaction.response.send_message(
-            f"{get_emoji(interaction.guild, 'tempvc_ico_delete', '🗑️')} Are you sure you want to delete **{ch_data.name}**?{extra_note}",
+            f"{get_emoji(interaction.client, 'tempvc_ico_delete', '🗑️')} Are you sure you want to delete **{ch_data.name}**?{extra_note}",
             view=ConfirmDeleteView(cid, ch_data),
             ephemeral=True,
         )
@@ -798,7 +798,7 @@ class TempVCSharedView(discord.ui.View):
     def __init__(self) -> None:
         super().__init__(timeout=None)
 
-    def customize_for_guild(self, guild: discord.Guild | None) -> None:
+    def customize_for_client(self, client: discord.Client) -> None:
         fallbacks = {
             "name": ("tempvc_ico_name", "🏷️"),
             "limit": ("tempvc_ico_limit", "👥"),
@@ -823,7 +823,7 @@ class TempVCSharedView(discord.ui.View):
                     action = parts[1]
                     if action in fallbacks:
                         emoji_name, fallback_emoji = fallbacks[action]
-                        item.emoji = get_button_emoji(guild, emoji_name, fallback_emoji)
+                        item.emoji = get_button_emoji(client, emoji_name, fallback_emoji)
                         item.label = None
 
 
@@ -934,21 +934,21 @@ class TempVCSharedView(discord.ui.View):
         cid, ch, data, err = await _shared_owner_check(interaction)
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
-        await interaction.response.send_message(f"{get_emoji(interaction.guild, 'tempvc_ico_trust', '✅')} **Trust a User**", view=UserActionView("trust", cid), ephemeral=True)
+        await interaction.response.send_message(f"{get_emoji(interaction.client, 'tempvc_ico_trust', '✅')} **Trust a User**", view=UserActionView("trust", cid), ephemeral=True)
 
     @discord.ui.button(label="UNTRUST", emoji="❎", style=discord.ButtonStyle.secondary, custom_id="tempvcshared:untrust", row=1)
     async def btn_untrust(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         cid, ch, data, err = await _shared_owner_check(interaction)
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
-        await interaction.response.send_message(f"{get_emoji(interaction.guild, 'tempvc_ico_untrust', '❎')} **Untrust a User**", view=UserActionView("untrust", cid), ephemeral=True)
+        await interaction.response.send_message(f"{get_emoji(interaction.client, 'tempvc_ico_untrust', '❎')} **Untrust a User**", view=UserActionView("untrust", cid), ephemeral=True)
 
     @discord.ui.button(label="INVITE",  emoji="📨", style=discord.ButtonStyle.secondary, custom_id="tempvcshared:invite",  row=1)
     async def btn_invite(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         cid, ch, data, err = await _shared_owner_check(interaction)
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
-        await interaction.response.send_message(f"{get_emoji(interaction.guild, 'tempvc_ico_invite', '📨')} **Invite a User**", view=UserActionView("invite", cid), ephemeral=True)
+        await interaction.response.send_message(f"{get_emoji(interaction.client, 'tempvc_ico_invite', '📨')} **Invite a User**", view=UserActionView("invite", cid), ephemeral=True)
 
     @discord.ui.button(label="KICK",    emoji="👢", style=discord.ButtonStyle.danger,    custom_id="tempvcshared:kick",    row=1)
     async def btn_kick(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -958,28 +958,28 @@ class TempVCSharedView(discord.ui.View):
         vc_members = [m for m in channel.members if m.id != interaction.user.id and not m.bot]
         if not vc_members:
             return await interaction.response.send_message("❌ Nobody else in your channel to kick!", ephemeral=True)
-        await interaction.response.send_message(f"{get_emoji(interaction.guild, 'tempvc_ico_kick', '👢')} **Kick a User**", view=UserActionView("kick", cid), ephemeral=True)
+        await interaction.response.send_message(f"{get_emoji(interaction.client, 'tempvc_ico_kick', '👢')} **Kick a User**", view=UserActionView("kick", cid), ephemeral=True)
 
     @discord.ui.button(label="REGION",  emoji="🌐", style=discord.ButtonStyle.secondary, custom_id="tempvcshared:region",  row=1)
     async def btn_region(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         cid, ch, data, err = await _shared_owner_check(interaction)
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
-        await interaction.response.send_message(f"{get_emoji(interaction.guild, 'tempvc_ico_region', '🌐')} **Change Voice Region**", view=RegionSelectView(cid), ephemeral=True)
+        await interaction.response.send_message(f"{get_emoji(interaction.client, 'tempvc_ico_region', '🌐')} **Change Voice Region**", view=RegionSelectView(cid), ephemeral=True)
 
     @discord.ui.button(label="BLOCK",    emoji="🚫", style=discord.ButtonStyle.danger,     custom_id="tempvcshared:block",    row=2)
     async def btn_block(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         cid, ch, data, err = await _shared_owner_check(interaction)
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
-        await interaction.response.send_message(f"{get_emoji(interaction.guild, 'tempvc_ico_block', '🚫')} **Block a User**", view=UserActionView("block", cid), ephemeral=True)
+        await interaction.response.send_message(f"{get_emoji(interaction.client, 'tempvc_ico_block', '🚫')} **Block a User**", view=UserActionView("block", cid), ephemeral=True)
 
     @discord.ui.button(label="UNBLOCK",  emoji="✔️", style=discord.ButtonStyle.secondary,  custom_id="tempvcshared:unblock",  row=2)
     async def btn_unblock(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         cid, ch, data, err = await _shared_owner_check(interaction)
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
-        await interaction.response.send_message(f"{get_emoji(interaction.guild, 'tempvc_ico_unblock', '✔️')} **Unblock a User**", view=UserActionView("unblock", cid), ephemeral=True)
+        await interaction.response.send_message(f"{get_emoji(interaction.client, 'tempvc_ico_unblock', '✔️')} **Unblock a User**", view=UserActionView("unblock", cid), ephemeral=True)
 
     @discord.ui.button(label="CLAIM",    emoji="👑", style=discord.ButtonStyle.success,    custom_id="tempvcshared:claim",    row=2)
     async def btn_claim(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -1007,14 +1007,14 @@ class TempVCSharedView(discord.ui.View):
             f"{member.mention} has claimed ownership of voice channel {channel.mention}.",
             color=0x3498DB
         )
-        await interaction.response.send_message(f"{get_emoji(interaction.guild, 'tempvc_ico_claim', '👑')} You've claimed **{channel.name}**!", ephemeral=True)
+        await interaction.response.send_message(f"{get_emoji(interaction.client, 'tempvc_ico_claim', '👑')} You've claimed **{channel.name}**!", ephemeral=True)
 
     @discord.ui.button(label="TRANSFER", emoji="🔄", style=discord.ButtonStyle.secondary,  custom_id="tempvcshared:transfer", row=2)
     async def btn_transfer(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         cid, ch, data, err = await _shared_owner_check(interaction)
         if err:
             return await interaction.response.send_message(err, ephemeral=True)
-        await interaction.response.send_message(f"{get_emoji(interaction.guild, 'tempvc_ico_transfer', '🔄')} **Transfer Ownership**", view=UserActionView("transfer", cid), ephemeral=True)
+        await interaction.response.send_message(f"{get_emoji(interaction.client, 'tempvc_ico_transfer', '🔄')} **Transfer Ownership**", view=UserActionView("transfer", cid), ephemeral=True)
 
     @discord.ui.button(label="DELETE",   emoji="🗑️", style=discord.ButtonStyle.danger,     custom_id="tempvcshared:delete",   row=2)
     async def btn_delete(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -1026,7 +1026,7 @@ class TempVCSharedView(discord.ui.View):
         if ch_data.chat_channel_id: extras.append("text chat")
         extra_note = f"\nThis will also delete the {' and '.join(extras)}." if extras else ""
         await interaction.response.send_message(
-            f"{get_emoji(interaction.guild, 'tempvc_ico_delete', '🗑️')} Are you sure you want to delete **{ch_data.name}**?{extra_note}",
+            f"{get_emoji(interaction.client, 'tempvc_ico_delete', '🗑️')} Are you sure you want to delete **{ch_data.name}**?{extra_note}",
             view=ConfirmDeleteView(cid, ch_data), ephemeral=True,
         )
 
