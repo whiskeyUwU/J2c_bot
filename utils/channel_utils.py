@@ -1,7 +1,5 @@
 
 from __future__ import annotations
-import io
-from datetime import datetime, timezone
 import discord
 from utils.database import db, TempChannel
 
@@ -149,102 +147,7 @@ async def refresh_panel(
         pass
 
 
-async def _host_html_online(html_content: str, filename: str) -> str | None:
-    """Upload the HTML file to 0x0.st and return a direct browser URL."""
-    try:
-        import aiohttp
-        form = aiohttp.FormData()
-        form.add_field(
-            "file",
-            html_content.encode("utf-8"),
-            filename=filename,
-            content_type="text/html; charset=utf-8",
-        )
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                "https://0x0.st",
-                data=form,
-                timeout=aiohttp.ClientTimeout(total=30),
-            ) as resp:
-                if resp.status == 200:
-                    return (await resp.text()).strip()
-    except Exception:
-        pass
-    return None
 
-
-async def _upload_html_transcript(
-    guild: discord.Guild,
-    ch_data: TempChannel,
-    vc: discord.VoiceChannel,
-    bot=None,
-) -> None:
-    """Generate an HTML transcript using chat-exporter and upload to the log channel."""
-    config = db.get_config(guild.id)
-    if not config or not config.log_channel_id:
-        return
-    log_ch = guild.get_channel(config.log_channel_id)
-    if not log_ch:
-        return
-
-    try:
-        import chat_exporter
-        transcript = await chat_exporter.export(
-            vc,
-            limit=None,
-            bot=bot,
-            military_time=True,
-        )
-    except Exception:
-        transcript = None
-
-    if not transcript:
-        return
-
-    safe_name = (
-        ch_data.name
-        .replace("\U0001f399\ufe0f", "")  # strip 🎙️
-        .replace(" ", "-")
-        .strip("-")
-        .lower()
-        or "vc"
-    )
-    date_str = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M")
-    filename = f"transcript-{safe_name}-{date_str}.html"
-
-    # Try to host online for a direct browser link
-    transcript_url = await _host_html_online(transcript, filename)
-
-    embed = discord.Embed(
-        title="📋 Voice Chat Transcript",
-        color=0x5865F2,
-    )
-    embed.add_field(name="Channel", value=ch_data.name, inline=True)
-    embed.add_field(name="Owner", value=f"<@{ch_data.owner_id}>", inline=True)
-    embed.timestamp = discord.utils.utcnow()
-
-    if transcript_url:
-        # Post as a clickable link — opens directly in browser, no file attached!
-        embed.description = (
-            f"### [🔗 Click here to view the transcript]({transcript_url})\n"
-            f"Opens directly in your browser — no download needed."
-        )
-        embed.set_footer(text="Hosted on 0x0.st • Link valid for ~30 days")
-        try:
-            await log_ch.send(embed=embed)
-        except (discord.Forbidden, discord.HTTPException):
-            pass
-    else:
-        # Fallback: attach the file if hosting fails
-        embed.description = (
-            f"Transcript saved — download the `.html` file and open it in your browser."
-        )
-        embed.set_footer(text="Open the .html file in any browser to view")
-        file = discord.File(io.BytesIO(transcript.encode("utf-8")), filename=filename)
-        try:
-            await log_ch.send(embed=embed, file=file)
-        except (discord.Forbidden, discord.HTTPException):
-            pass
 
 
 async def cleanup(
@@ -297,11 +200,8 @@ async def cleanup(
             except discord.HTTPException:
                 pass
 
-    # Generate and upload HTML transcript BEFORE deleting the voice channel
     vc = guild.get_channel(channel_id)
     if vc:
-        await _upload_html_transcript(guild, ch_data, vc, bot=bot)
-
         try:
             await vc.delete(reason="TempVC: Temp VC cleaned up")
         except discord.HTTPException:

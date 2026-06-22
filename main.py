@@ -12,7 +12,7 @@ intents = discord.Intents.default()
 intents.voice_states    = True
 intents.members         = True
 intents.guilds          = True
-intents.message_content = True   # needed to read VC built-in chat for transcripts
+intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
