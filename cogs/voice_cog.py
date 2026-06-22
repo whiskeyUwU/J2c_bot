@@ -228,10 +228,20 @@ class VoiceCog(commands.Cog):
             await channel.delete()
             return
 
+        # ── Restore saved memory into TempChannel record ──────────────────
+        memory = db.get_memory(guild.id, member.id)
+
         ch_data = TempChannel(
             owner_id=member.id,
             guild_id=guild.id,
             name=channel.name,
+            user_limit=memory.user_limit if memory else 0,
+            is_locked=memory.is_locked if memory else False,
+            is_hidden=memory.is_hidden if memory else False,
+            region=memory.region if memory else None,
+            trusted_users=set(memory.trusted_users) if memory else set(),
+            blocked_users=set(memory.blocked_users) if memory else set(),
+            muted_by_owner=set(memory.muted_by_owner) if memory else set(),
         )
         db.create(channel.id, ch_data)
 
@@ -264,6 +274,49 @@ class VoiceCog(commands.Cog):
             db.save()
         except discord.HTTPException:
             pass
+
+        # ── Send restoration notice if settings were loaded ───────────────
+        if memory:
+            fields: list[tuple[str, str]] = []
+
+            if memory.name:
+                fields.append(("🏷️  Name",    f"`{memory.name}`"))
+            if memory.user_limit:
+                fields.append(("👥  Limit",   f"`{memory.user_limit} users`"))
+            if memory.is_hidden:
+                fields.append(("🙈  Privacy", "`Hidden`"))
+            elif memory.is_locked:
+                fields.append(("🔒  Privacy", "`Locked`"))
+            if memory.region:
+                fields.append(("🌐  Region",  f"`{memory.region}`"))
+            if memory.trusted_users:
+                n = len(memory.trusted_users)
+                fields.append(("✅  Trusted", f"`{n} user{'s' if n != 1 else ''}`"))
+            if memory.blocked_users:
+                n = len(memory.blocked_users)
+                fields.append(("🚫  Blocked", f"`{n} user{'s' if n != 1 else ''}`"))
+            if memory.muted_by_owner:
+                n = len(memory.muted_by_owner)
+                fields.append(("🔇  Muted",   f"`{n} user{'s' if n != 1 else ''}`"))
+
+            if fields:
+                restore_embed = discord.Embed(
+                    title="💾  Settings Restored",
+                    description=(
+                        f"Welcome back, {member.mention}!\n"
+                        f"Your previous channel preferences have been applied automatically."
+                    ),
+                    color=0x5865F2,
+                )
+                for name, value in fields:
+                    restore_embed.add_field(name=name, value=value, inline=True)
+                restore_embed.set_footer(
+                    text="This message will disappear in 20 seconds  •  TempVC Memory",
+                )
+                try:
+                    await channel.send(embed=restore_embed, delete_after=20)
+                except discord.HTTPException:
+                    pass
 
     async def _on_leave_temp_vc(
         self,
@@ -443,6 +496,7 @@ class VoiceCog(commands.Cog):
             )
 
             config.owner_warnings[owner_id] = 0
+            config.penalized_owners.add(owner_id)
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(VoiceCog(bot))

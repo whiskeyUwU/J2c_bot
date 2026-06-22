@@ -42,7 +42,7 @@ def build_interface_embed(guild: discord.Guild | None) -> discord.Embed:
         color=0xfd3c65,
     )
     embed.set_image(url="attachment://interface.png")
-    embed.set_footer(text="made with ❤️ by whiskey")
+    embed.set_footer(text="Press the buttons below to manage your channel")
     return embed
 
 

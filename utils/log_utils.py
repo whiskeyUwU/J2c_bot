@@ -22,7 +22,6 @@ async def log_to_admin_channel(
         color=color
     )
     embed.timestamp = discord.utils.utcnow()
-    embed.set_footer(text="made with ❤️ by whiskey")
 
     if fields:
         for f in fields:

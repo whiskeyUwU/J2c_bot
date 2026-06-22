@@ -130,7 +130,7 @@ class SetupCog(commands.Cog):
         embed.add_field(name="📋 Panel Channel",       value=panel_channel.mention, inline=True)
         embed.add_field(name="📁 Category",            value=category.mention,      inline=True)
         embed.add_field(name="📜 Log Channel",         value=log_channel.mention,   inline=True)
-        embed.set_footer(text="made with ❤️ by whiskey")
+        embed.set_footer(text="A permanent shared panel has been posted in #panel.")
 
         await interaction.followup.send(embed=embed, ephemeral=True)
 
@@ -166,7 +166,6 @@ class SetupCog(commands.Cog):
             description="\n".join(lines),
             color=0x5865F2,
         )
-        embed.set_footer(text="made with ❤️ by whiskey")
         await interaction.followup.send(embed=embed, ephemeral=True)
 
     @app_commands.command(
@@ -187,6 +186,7 @@ class SetupCog(commands.Cog):
             )
 
         config.owner_warnings.pop(member.id, None)
+        config.penalized_owners.discard(member.id)
 
         from utils.log_utils import log_to_admin_channel
         await log_to_admin_channel(
