@@ -1,5 +1,6 @@
 
 from __future__ import annotations
+import asyncio
 import discord
 from discord.ext import commands, tasks
 
@@ -329,10 +330,9 @@ class VoiceCog(commands.Cog):
             return
 
         if member.id in ch_data.muted_by_owner:
-            try:
-                await member.edit(mute=False, reason="TempVC: Left VC — unmuting (will re-mute on rejoin)")
-            except (discord.Forbidden, discord.HTTPException):
-                pass
+            asyncio.create_task(
+                member.edit(mute=False, reason="TempVC: Left VC — unmuting (will re-mute on rejoin)")
+            )
 
         if len(channel.members) == 0:
             await cleanup(channel.id, ch_data, guild, bot=self.bot)
